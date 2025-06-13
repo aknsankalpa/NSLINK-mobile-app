@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../backend/services/database_service.dart';
 import '../../../backend/models/booking.dart';
 import '../../../backend/models/room.dart';
+import 'admin_login_screen.dart'; // Add this import
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});
@@ -33,7 +34,12 @@ class _AdminPanelScreenState extends State<AdminPanelScreen>
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const AdminLoginScreen()),
+            );
+          },
         ),
         bottom: TabBar(
           controller: _tabController,
@@ -41,18 +47,9 @@ class _AdminPanelScreenState extends State<AdminPanelScreen>
           unselectedLabelColor: Colors.grey,
           indicatorColor: Colors.teal,
           tabs: const [
-            Tab(
-              icon: Icon(Icons.pending_actions),
-              text: 'Pending',
-            ),
-            Tab(
-              icon: Icon(Icons.meeting_room),
-              text: 'Rooms',
-            ),
-            Tab(
-              icon: Icon(Icons.bar_chart),
-              text: 'Reports',
-            ),
+            Tab(icon: Icon(Icons.pending_actions), text: 'Pending'),
+            Tab(icon: Icon(Icons.meeting_room), text: 'Rooms'),
+            Tab(icon: Icon(Icons.bar_chart), text: 'Reports'),
           ],
         ),
       ),
@@ -204,13 +201,7 @@ class _RoomsTabState extends State<_RoomsTab> {
           startTime.hour,
           startTime.minute,
         ),
-        DateTime(
-          date.year,
-          date.month,
-          date.day,
-          endTime.hour,
-          endTime.minute,
-        ),
+        DateTime(date.year, date.month, date.day, endTime.hour, endTime.minute),
       );
 
       if (!mounted) return;
@@ -316,9 +307,7 @@ class _RoomsTabState extends State<_RoomsTab> {
         final rooms = snapshot.data ?? [];
 
         if (rooms.isEmpty) {
-          return const Center(
-            child: Text('No rooms available'),
-          );
+          return const Center(child: Text('No rooms available'));
         }
 
         return ListView.builder(
@@ -326,10 +315,7 @@ class _RoomsTabState extends State<_RoomsTab> {
           itemBuilder: (context, index) {
             final room = rooms[index];
             return Card(
-              margin: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: ListTile(
                 title: Text('Room ${room.name}'),
                 subtitle: Text('Capacity: ${room.capacity}'),
@@ -381,12 +367,15 @@ class _ReportsTab extends StatelessWidget {
         final bookings = snapshot.data ?? [];
 
         final totalBookings = bookings.length;
-        final approvedBookings =
-            bookings.where((b) => b.status == 'approved').length;
-        final pendingBookings =
-            bookings.where((b) => b.status == 'pending').length;
-        final rejectedBookings =
-            bookings.where((b) => b.status == 'rejected').length;
+        final approvedBookings = bookings
+            .where((b) => b.status == 'approved')
+            .length;
+        final pendingBookings = bookings
+            .where((b) => b.status == 'pending')
+            .length;
+        final rejectedBookings = bookings
+            .where((b) => b.status == 'rejected')
+            .length;
 
         // Calculate room utilization
         final roomBookings = <String, int>{};
@@ -400,13 +389,13 @@ class _ReportsTab extends StatelessWidget {
         final mostBookedRoom = roomBookings.isEmpty
             ? 'None'
             : roomBookings.entries
-                .reduce((a, b) => a.value > b.value ? a : b)
-                .key;
+                  .reduce((a, b) => a.value > b.value ? a : b)
+                  .key;
         final leastBookedRoom = roomBookings.isEmpty
             ? 'None'
             : roomBookings.entries
-                .reduce((a, b) => a.value < b.value ? a : b)
-                .key;
+                  .reduce((a, b) => a.value < b.value ? a : b)
+                  .key;
 
         // Calculate average booking duration
         final totalDuration = bookings.fold<Duration>(
@@ -414,8 +403,9 @@ class _ReportsTab extends StatelessWidget {
           (total, booking) =>
               total + (booking.endTime.difference(booking.startTime)),
         );
-        final averageDuration =
-            bookings.isEmpty ? 0 : totalDuration.inHours / bookings.length;
+        final averageDuration = bookings.isEmpty
+            ? 0
+            : totalDuration.inHours / bookings.length;
 
         if (bookings.isNotEmpty) {
           return SingleChildScrollView(
@@ -425,30 +415,21 @@ class _ReportsTab extends StatelessWidget {
               children: [
                 const Text(
                   'Reports',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 24),
-                _buildReportCard(
-                  'Booking Statistics',
-                  [
-                    'Total Bookings: $totalBookings',
-                    'Approved Bookings: $approvedBookings',
-                    'Pending Bookings: $pendingBookings',
-                    'Rejected Bookings: $rejectedBookings',
-                  ],
-                ),
+                _buildReportCard('Booking Statistics', [
+                  'Total Bookings: $totalBookings',
+                  'Approved Bookings: $approvedBookings',
+                  'Pending Bookings: $pendingBookings',
+                  'Rejected Bookings: $rejectedBookings',
+                ]),
                 const SizedBox(height: 16),
-                _buildReportCard(
-                  'Room Utilization',
-                  [
-                    'Most Booked Room: $mostBookedRoom',
-                    'Least Booked Room: $leastBookedRoom',
-                    'Average Booking Duration: ${averageDuration.toStringAsFixed(1)} hours',
-                  ],
-                ),
+                _buildReportCard('Room Utilization', [
+                  'Most Booked Room: $mostBookedRoom',
+                  'Least Booked Room: $leastBookedRoom',
+                  'Average Booking Duration: ${averageDuration.toStringAsFixed(1)} hours',
+                ]),
               ],
             ),
           );
@@ -468,16 +449,15 @@ class _ReportsTab extends StatelessWidget {
           children: [
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            ...items.map((item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(item),
-                )),
+            ...items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(item),
+              ),
+            ),
           ],
         ),
       ),

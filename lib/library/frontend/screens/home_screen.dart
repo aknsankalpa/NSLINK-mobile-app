@@ -6,6 +6,7 @@ import 'package:badges/badges.dart' as badges;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nslink_new/student/studentDashboard.dart';
 import 'package:nslink_new/library/frontend/screens/notifications_screen.dart';
+import 'package:nslink_new/library/frontend/screens/admin/admin_login_screen.dart'; // Add this import
 
 class LibraryHomeScreen extends StatefulWidget {
   const LibraryHomeScreen({super.key});
@@ -99,7 +100,12 @@ class _HomeScreenState extends State<LibraryHomeScreen> {
           IconButton(
             icon: const Icon(Icons.admin_panel_settings_outlined),
             onPressed: () {
-              Navigator.pushNamed(context, '/admin_login');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AdminLoginScreen(),
+                ),
+              );
             },
           ),
         ],
